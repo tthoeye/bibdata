@@ -27,7 +27,7 @@ public class RecordHandler extends DefaultHandler {
     
     private File recordfile;
     private File keywordfile;
-    private File themefile;
+    private File authorfile;
     
     private HashMap<String, String> keywords;
     private HashMap<String, String> themes;
@@ -65,12 +65,12 @@ public class RecordHandler extends DefaultHandler {
         }
         
         // Locate file to save themes
-        fc.setDialogTitle("Save themes CSV to:");
+        fc.setDialogTitle("Save authors CSV to:");
         returnVal = fc.showSaveDialog(null);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            this.themefile = fc.getSelectedFile();
+            this.authorfile = fc.getSelectedFile();
             //This is where a real application would save the file.
-            System.out.println("Saving themes to: " + themefile.getAbsolutePath());
+            System.out.println("Saving authors to: " + authorfile.getAbsolutePath());
         } else {
             System.out.println("Cannot save file");
             return;
@@ -104,10 +104,14 @@ public class RecordHandler extends DefaultHandler {
                 this.parsemode = PARSEMODE_RECORD;
                 record.clear();
                 record.put("id", id);
+                return;
             }
         } else if (parsemode == PARSEMODE_RECORD) {
-            // This is a child tag of a record
-            
+            switch (localName) {
+                case "_200a":
+                    record.put("title", record.get("title"));
+                    return;
+            }  
         }
     }
     
@@ -116,7 +120,7 @@ public class RecordHandler extends DefaultHandler {
                         String qName) {
         if (localName == "BibDocumentsGent.Record") {
             this.parsemode = PARSEMODE_NONE;
-            System.out.println("Printing record: " + record.get("id"));
+            System.out.println("Printing record title: " + record.get("title"));
         }
     }
 }
