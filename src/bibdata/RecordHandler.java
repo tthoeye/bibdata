@@ -5,10 +5,16 @@
  */
 package bibdata;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.swing.JFileChooser;
 import org.xml.sax.Attributes;
@@ -65,16 +71,22 @@ public class RecordHandler extends DefaultHandler {
     private JFileChooser fc;
     
     private File recordfile;
+    private BufferedWriter recordbf;
     private File keywordfile;
     private File authorfile;
     
     private HashMap<String, String> keywords;
     private HashMap<String, String> themes;
-    private HashMap<String, String> record;
+    private HashMap<String, Object> record;
+    
+    private HashMap<Integer, ArrayList> authors;
+    private HashMap<Integer, ArrayList> authorlinks;
     
     private int parsemode;
+    private int rid;
     private String parsekey;
     private String cnt;
+    private String cid;
 
     public RecordHandler(File file) {  
         
@@ -82,6 +94,7 @@ public class RecordHandler extends DefaultHandler {
         this.parsemode = PARSEMODE_NONE;
         this.parsekey = "NONE";
         this.cnt = "";
+        this.rid = 0;
         this.fc = new JFileChooser();
         // Locate file to save records
         fc.setDialogTitle("Save records CSV to:");
@@ -89,7 +102,17 @@ public class RecordHandler extends DefaultHandler {
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             this.recordfile = fc.getSelectedFile();
             //This is where a real application would save the file.
-            System.out.println("Saving records to: " + recordfile.getAbsolutePath());
+            // System.out.println("Saving records to: " + recordfile.getAbsolutePath());
+ 
+            try {
+                FileWriter fw = new FileWriter(recordfile);
+                recordbf = new BufferedWriter(fw);
+            } catch (IOException ex) {
+                System.out.println("Cannot save file");
+                return;
+            }
+            
+
         } else {
             System.out.println("Cannot save file");
             return;
@@ -102,7 +125,7 @@ public class RecordHandler extends DefaultHandler {
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             this.keywordfile = fc.getSelectedFile();
             //This is where a real application would save the file.
-            System.out.println("Saving records to: " + keywordfile.getAbsolutePath());
+            // System.out.println("Saving records to: " + keywordfile.getAbsolutePath());
         } else {
             System.out.println("Cannot save file");
             return;
@@ -114,15 +137,28 @@ public class RecordHandler extends DefaultHandler {
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             this.authorfile = fc.getSelectedFile();
             //This is where a real application would save the file.
-            System.out.println("Saving authors to: " + authorfile.getAbsolutePath());
+            // System.out.println("Saving authors to: " + authorfile.getAbsolutePath());
         } else {
             System.out.println("Cannot save file");
             return;
         }
         
         this.keywords = new HashMap<String, String>();
+        
+        this.authors = new HashMap<Integer, ArrayList>();
         this.themes = new HashMap<String, String>();
-        this.record = new HashMap<String, String>();
+        this.record = new HashMap<String, Object>();
+        String lineout = "id;";
+        for (String key : KEYS.keySet()) {
+            lineout += KEYS.get(key) + ";";
+        }
+        
+        try {
+            this.recordbf.write(lineout);
+            this.recordbf.newLine();
+        } catch (IOException ex) {
+            System.out.println("Could not write headers");
+        }
     }
     
     public void startDocument() throws SAXException {
@@ -130,7 +166,11 @@ public class RecordHandler extends DefaultHandler {
     }
 
     public void endDocument() throws SAXException {
-   
+        try {
+            recordbf.close();
+        } catch (IOException ex) {
+            System.out.println("Could not finnish writing to " + recordfile.getName());
+        }
     }
  
     public void startElement(String nsURI,String localName, String qName, Attributes atts)
@@ -138,13 +178,14 @@ public class RecordHandler extends DefaultHandler {
 
         // RECOGNIZE RECORD START TAG
         if (localName == "BibDocumentsGent.Record") {
-            
+            this.rid++;
             String id = atts.getValue("Value");
             // If this is a valid record (with a "valid" ID)
             if (localName == "BibDocumentsGent.Record" && Pattern.matches("\\d+\\^\\d+", id)) {
+                
                 // We are starting a new record
                 this.parsemode = PARSEMODE_RECORD;
-                record.clear();
+                this.cid = id;
                 record.put("id", id);
                 return;
             }
@@ -163,8 +204,23 @@ public class RecordHandler extends DefaultHandler {
     @Override
     public void endElement(String uri, String localName, String qName) {
         if (localName == "BibDocumentsGent.Record") {
+            System.out.println("writing " + record.get("id"));
             this.parsemode = PARSEMODE_NONE;
-            System.out.println("Finishing record: " + record.get("title"));
+            String lineout = record.get("id") + ";";
+            for (String key : KEYS.values()) {
+                if (record.containsKey(key)) {
+                    lineout += record.get(key) + ";";
+                } else {
+                    lineout += ";";
+                }
+            }
+            try {
+                recordbf.write(lineout);
+                recordbf.newLine();
+            } catch (IOException ex) {
+                System.out.println("Error writing to " + recordfile.getName());
+            }
+            record.clear();
         }
     }
     
@@ -177,17 +233,15 @@ public class RecordHandler extends DefaultHandler {
         String value = new String(ch, start, length); 
         // CURRENTLY PARSING A RECORD, IDENTIFY RECORD PROPERTIES
         if (parsemode == PARSEMODE_RECORD && parsekey != "NONE") {
-            
-            switch (this.parsekey) {
-                case "author":
-                    // Do some crazy stuff
-                    System.out.println("Adding author: " + value);
-                    break;
-                default:
-                    record.put(parsekey, value);
-                    break;
-                      
-            } 
+            if (this.cnt.trim().equals("1")) {
+                switch (this.parsekey) {
+                    default:
+                        //System.out.println("parse key" + parsekey);
+                        record.put(parsekey, value);
+                        break;
+
+                } 
+            }
             this.parsekey = "NONE";
         }
     }
