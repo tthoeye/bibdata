@@ -43,7 +43,7 @@ public class Bibdata {
                 spf.setNamespaceAware(true);
                 SAXParser saxParser = spf.newSAXParser();
                 XMLReader xmlReader = saxParser.getXMLReader();
-                xmlReader.setContentHandler(new RecordHandler(file));
+                xmlReader.setContentHandler(new BorrowingsHandler(file));
                 xmlReader.parse(ofilename);
             } catch (IOException ex) {
                 Logger.getLogger(Bibdata.class.getName()).log(Level.SEVERE, null, ex);
