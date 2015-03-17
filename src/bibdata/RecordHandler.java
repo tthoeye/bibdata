@@ -108,7 +108,7 @@ public class RecordHandler extends DefaultHandler {
                 FileWriter fw = new FileWriter(recordfile);
                 recordbf = new BufferedWriter(fw);
             } catch (IOException ex) {
-                System.out.println("Cannot save file");
+                Logger.getGlobal().log(Level.SEVERE, "Cannot save file");
                 return;
             }
             
@@ -127,7 +127,7 @@ public class RecordHandler extends DefaultHandler {
             //This is where a real application would save the file.
             // System.out.println("Saving records to: " + keywordfile.getAbsolutePath());
         } else {
-            System.out.println("Cannot save file");
+            Logger.getGlobal().log(Level.SEVERE, "Cannot save file");
             return;
         }
         
@@ -139,7 +139,7 @@ public class RecordHandler extends DefaultHandler {
             //This is where a real application would save the file.
             // System.out.println("Saving authors to: " + authorfile.getAbsolutePath());
         } else {
-            System.out.println("Cannot save file");
+            Logger.getGlobal().log(Level.SEVERE, "Cannot save file");
             return;
         }
         
@@ -169,7 +169,7 @@ public class RecordHandler extends DefaultHandler {
         try {
             recordbf.close();
         } catch (IOException ex) {
-            System.out.println("Could not finnish writing to " + recordfile.getName());
+            Logger.getGlobal().log(Level.SEVERE, "Could not finnish writing to " + recordfile.getName());
         }
     }
  
