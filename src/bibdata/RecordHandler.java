@@ -114,7 +114,7 @@ public class RecordHandler extends DefaultHandler {
             
 
         } else {
-            System.out.println("Cannot save file");
+            Logger.getGlobal().log(Level.SEVERE,"Cannot save file");
             return;
         }
         
@@ -127,7 +127,7 @@ public class RecordHandler extends DefaultHandler {
             //This is where a real application would save the file.
             // System.out.println("Saving records to: " + keywordfile.getAbsolutePath());
         } else {
-            Logger.getGlobal().log(Level.SEVERE, "Cannot save file");
+            Logger.getGlobal().log(Level.SEVERE, "Cannot save keywords file");
             return;
         }
         
@@ -139,15 +139,16 @@ public class RecordHandler extends DefaultHandler {
             //This is where a real application would save the file.
             // System.out.println("Saving authors to: " + authorfile.getAbsolutePath());
         } else {
-            Logger.getGlobal().log(Level.SEVERE, "Cannot save file");
+            Logger.getGlobal().log(Level.SEVERE, "Cannot save authors file");
             return;
         }
         
-        this.keywords = new HashMap<String, String>();
-        
+        this.keywords = new HashMap<String, String>();  
         this.authors = new HashMap<Integer, ArrayList>();
         this.themes = new HashMap<String, String>();
         this.record = new HashMap<String, Object>();
+        
+        // Write headers
         String lineout = "id;";
         for (String key : KEYS.keySet()) {
             lineout += KEYS.get(key) + ";";
@@ -157,7 +158,7 @@ public class RecordHandler extends DefaultHandler {
             this.recordbf.write(lineout);
             this.recordbf.newLine();
         } catch (IOException ex) {
-            System.out.println("Could not write headers");
+            Logger.getGlobal().log(Level.SEVERE, "Could not write headers to " + recordfile.getName());
         }
     }
     
@@ -168,6 +169,7 @@ public class RecordHandler extends DefaultHandler {
     public void endDocument() throws SAXException {
         try {
             recordbf.close();
+            Logger.getGlobal().log(Level.INFO, "Succesfully finished writing " + this.rid + " records to " + recordfile.getName());
         } catch (IOException ex) {
             Logger.getGlobal().log(Level.SEVERE, "Could not finnish writing to " + recordfile.getName());
         }
@@ -204,7 +206,7 @@ public class RecordHandler extends DefaultHandler {
     @Override
     public void endElement(String uri, String localName, String qName) {
         if (localName == "BibDocumentsGent.Record") {
-            System.out.println("writing " + record.get("id"));
+            Logger.getGlobal().log(Level.INFO,"writing " + record.get("id"));
             this.parsemode = PARSEMODE_NONE;
             String lineout = record.get("id") + ";";
             for (String key : KEYS.values()) {
@@ -218,7 +220,7 @@ public class RecordHandler extends DefaultHandler {
                 recordbf.write(lineout);
                 recordbf.newLine();
             } catch (IOException ex) {
-                System.out.println("Error writing to " + recordfile.getName());
+                Logger.getGlobal().log(Level.SEVERE,"Could not write record to " + recordfile.getName());
             }
             record.clear();
         }
