@@ -26,12 +26,15 @@ import org.xml.sax.XMLReader;
 public class BibdataFrame extends javax.swing.JFrame {
 
     private JFileChooser fc;
+    private Logger logger;
+    
     /**
      * Creates new form BibdataFrame
      */
     public BibdataFrame() {
         initComponents();
-        Logger.getGlobal().addHandler(new GUILogHandler(StatusText));
+        logger = Logger.getGlobal();
+        logger.addHandler(new GUILogHandler(StatusText));
     }
 
     /**
@@ -118,36 +121,36 @@ public class BibdataFrame extends javax.swing.JFrame {
                 XMLReader xmlReader = saxParser.getXMLReader();
                 switch (selectedHandler) {
                     case "Borrowers":
-                        Logger.getGlobal().log(Level.INFO, "Loading Borrowers handler");
+                        logger.log(Level.INFO, "Loading Borrowers handler");
                         xmlReader.setContentHandler(new BorrowerHandler(file));
                         break;
                     case "Borrowings":
-                        Logger.getGlobal().log(Level.INFO, "Loading Borrowings handler");
+                        logger.log(Level.INFO, "Loading Borrowings handler");
                         xmlReader.setContentHandler(new BorrowingsHandler(file));
                         break;
                     case "Records":
-                        Logger.getGlobal().log(Level.INFO, "Loading Records handler");
-                        xmlReader.setContentHandler(new RecordHandler(file));
+                        logger.log(Level.INFO, "Loading Records handler");
+                        xmlReader.setContentHandler(new RecordHandler(file, logger));
                         break;
                     case "Copies":
-                        Logger.getGlobal().log(Level.INFO, "Loading Copies handler");
+                        logger.log(Level.INFO, "Loading Copies handler");
                         xmlReader.setContentHandler(new CopyHandler(file));
                         break;
                     case "Reservations":
-                        Logger.getGlobal().log(Level.INFO, "Loading Copies handler");
+                        logger.log(Level.INFO, "Loading Copies handler");
                         xmlReader.setContentHandler(new CopyHandler(file));
                         break;
                 }
                 xmlReader.parse(ofilename);
             } catch (IOException ex) {
-                Logger.getGlobal().log(Level.SEVERE, "Cannot parse " + ofilename + " due to I/O", ex);
+                logger.log(Level.SEVERE, "Cannot parse " + ofilename + " due to I/O", ex);
             } catch (SAXException ex) {
-                Logger.getGlobal().log(Level.SEVERE, "Cannot parse " + ofilename + " due to Malformed XML contents", ex);
+                logger.log(Level.SEVERE, "Cannot parse " + ofilename + " due to Malformed XML contents", ex);
             } catch (ParserConfigurationException ex) {
-                Logger.getGlobal().log(Level.SEVERE, "Cannot parse " + ofilename + " due to a configuration error", ex);
+                logger.log(Level.SEVERE, "Cannot parse " + ofilename + " due to a configuration error", ex);
             }
         } else {
-            Logger.getGlobal().log(Level.INFO, "User cancelled file open");
+            logger.log(Level.INFO, "User cancelled file open");
         }
     }//GEN-LAST:event_HandlerStartButtonActionPerformed
 

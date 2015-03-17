@@ -69,6 +69,7 @@ public class RecordHandler extends DefaultHandler {
     }
     
     private JFileChooser fc;
+    private Logger logger;
     
     private File recordfile;
     private BufferedWriter recordbf;
@@ -88,7 +89,7 @@ public class RecordHandler extends DefaultHandler {
     private String cnt;
     private String cid;
 
-    public RecordHandler(File file) {  
+    public RecordHandler(File file, Logger logger) {  
         
         // hold your horses!
         this.parsemode = PARSEMODE_NONE;
@@ -96,6 +97,8 @@ public class RecordHandler extends DefaultHandler {
         this.cnt = "";
         this.rid = 0;
         this.fc = new JFileChooser();
+        this.logger = logger;
+        logger.setLevel(Level.INFO);
         // Locate file to save records
         fc.setDialogTitle("Save records CSV to:");
         int returnVal = fc.showSaveDialog(null);
@@ -108,13 +111,13 @@ public class RecordHandler extends DefaultHandler {
                 FileWriter fw = new FileWriter(recordfile);
                 recordbf = new BufferedWriter(fw);
             } catch (IOException ex) {
-                Logger.getGlobal().log(Level.SEVERE, "Cannot save file");
+                logger.log(Level.SEVERE, "Cannot save file");
                 return;
             }
             
 
         } else {
-            Logger.getGlobal().log(Level.SEVERE,"Cannot save file");
+            logger.log(Level.SEVERE,"Cannot save file");
             return;
         }
         
@@ -127,7 +130,7 @@ public class RecordHandler extends DefaultHandler {
             //This is where a real application would save the file.
             // System.out.println("Saving records to: " + keywordfile.getAbsolutePath());
         } else {
-            Logger.getGlobal().log(Level.SEVERE, "Cannot save keywords file");
+            logger.log(Level.SEVERE, "Cannot save keywords file");
             return;
         }
         
@@ -139,7 +142,7 @@ public class RecordHandler extends DefaultHandler {
             //This is where a real application would save the file.
             // System.out.println("Saving authors to: " + authorfile.getAbsolutePath());
         } else {
-            Logger.getGlobal().log(Level.SEVERE, "Cannot save authors file");
+            logger.log(Level.SEVERE, "Cannot save authors file");
             return;
         }
         
@@ -158,7 +161,7 @@ public class RecordHandler extends DefaultHandler {
             this.recordbf.write(lineout);
             this.recordbf.newLine();
         } catch (IOException ex) {
-            Logger.getGlobal().log(Level.SEVERE, "Could not write headers to " + recordfile.getName());
+            logger.log(Level.SEVERE, "Could not write headers to " + recordfile.getName());
         }
     }
     
@@ -169,9 +172,9 @@ public class RecordHandler extends DefaultHandler {
     public void endDocument() throws SAXException {
         try {
             recordbf.close();
-            Logger.getGlobal().log(Level.INFO, "Succesfully finished writing " + this.rid + " records to " + recordfile.getName());
+            logger.log(Level.INFO, "Succesfully finished writing " + this.rid + " records to " + recordfile.getName());
         } catch (IOException ex) {
-            Logger.getGlobal().log(Level.SEVERE, "Could not finnish writing to " + recordfile.getName());
+            logger.log(Level.SEVERE, "Could not finnish writing to " + recordfile.getName());
         }
     }
  
@@ -206,8 +209,12 @@ public class RecordHandler extends DefaultHandler {
     @Override
     public void endElement(String uri, String localName, String qName) {
         if (localName == "BibDocumentsGent.Record") {
-            Logger.getGlobal().log(Level.INFO,"writing " + record.get("id"));
             this.parsemode = PARSEMODE_NONE;
+            logger.log(Level.INFO,"Writing record " + record.get("id"));
+            
+            if (record.containsKey("type") && record.get("type").equals("Track")) {
+                logger.log(Level.INFO,"Skipping record " + record.get("id") + "(because it\'s a Track)");
+            }
             String lineout = record.get("id") + ";";
             for (String key : KEYS.values()) {
                 if (record.containsKey(key)) {
@@ -220,7 +227,7 @@ public class RecordHandler extends DefaultHandler {
                 recordbf.write(lineout);
                 recordbf.newLine();
             } catch (IOException ex) {
-                Logger.getGlobal().log(Level.SEVERE,"Could not write record to " + recordfile.getName());
+                logger.log(Level.SEVERE,"Could not write record to " + recordfile.getName());
             }
             record.clear();
         }
