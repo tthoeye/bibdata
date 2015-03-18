@@ -89,7 +89,7 @@ public class RecordHandler extends DefaultHandler {
     private String cnt;
     private String cid;
 
-    public RecordHandler(File file, Logger logger) {  
+    public RecordHandler(File in, Logger logger) {  
         
         // hold your horses!
         this.parsemode = PARSEMODE_NONE;
@@ -98,7 +98,7 @@ public class RecordHandler extends DefaultHandler {
         this.rid = 0;
         this.fc = new JFileChooser();
         this.logger = logger;
-        logger.setLevel(Level.INFO);
+        
         // Locate file to save records
         fc.setDialogTitle("Save records CSV to:");
         int returnVal = fc.showSaveDialog(null);
