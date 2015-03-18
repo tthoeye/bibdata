@@ -38,7 +38,6 @@ public class CopyHandler extends DefaultHandler {
         map.put("PK", "PK");
         map.put("Datuminvoer", "datuminvoer");
         map.put("Aard", "aard");
-        map.put("Prijs", "prijs");
         map.put("BBnr", "BBnr");
         KEYS = Collections.unmodifiableMap(map);
     }
