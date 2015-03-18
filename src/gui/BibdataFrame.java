@@ -7,15 +7,19 @@ package gui;
 import bibdata.BorrowerHandler;
 import bibdata.BorrowingsHandler;
 import bibdata.CopyHandler;
+import bibdata.DeletedCopyHandler;
 import bibdata.RecordHandler;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.swing.JFileChooser;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
@@ -25,6 +29,7 @@ import org.xml.sax.XMLReader;
  */
 public class BibdataFrame extends javax.swing.JFrame {
 
+    public static final String START_DIR = "c:/temp/bib";
     private JFileChooser fc;
     private Logger logger;
     
@@ -54,7 +59,7 @@ public class BibdataFrame extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        HandlerSelect.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Borrowers", "Borrowings", "Records", "Copies", "Reservations" }));
+        HandlerSelect.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Borrowers", "Borrowings", "Records", "Copies", "Reservations", "DeletedCopies" }));
 
         HandlerStartButton.setText("Convert");
         HandlerStartButton.addActionListener(new java.awt.event.ActionListener() {
@@ -105,7 +110,7 @@ public class BibdataFrame extends javax.swing.JFrame {
         
         String selectedHandler = (String)this.HandlerSelect.getSelectedItem();
         
-        fc = new JFileChooser();
+        fc = new JFileChooser(START_DIR);
         int returnVal = fc.showOpenDialog(null);
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -139,6 +144,10 @@ public class BibdataFrame extends javax.swing.JFrame {
                     case "Reservations":
                         logger.log(Level.INFO, "Loading Copies handler");
                         xmlReader.setContentHandler(new CopyHandler(file));
+                        break;
+                    case "DeletedCopies":
+                        logger.log(Level.INFO, "Loading Copies handler");
+                        xmlReader.setContentHandler(new DeletedCopyHandler(file));
                         break;
                 }
                 xmlReader.parse(ofilename);
