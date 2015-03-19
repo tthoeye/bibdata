@@ -135,7 +135,7 @@ public class BibdataFrame extends javax.swing.JFrame {
                         break;
                     case "Records":
                         logger.log(Level.INFO, "Loading Records handler");
-                        xmlReader.setContentHandler(new RecordHandler(file, logger));
+                        xmlReader.setContentHandler(new RecordHandler(file));
                         break;
                     case "Copies":
                         logger.log(Level.INFO, "Loading Copies handler");
