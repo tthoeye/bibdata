@@ -9,6 +9,7 @@ import bibdata.BorrowingsHandler;
 import bibdata.CopyHandler;
 import bibdata.DeletedCopyHandler;
 import bibdata.RecordHandler;
+import bibdata.ReservationHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -142,13 +143,14 @@ public class BibdataFrame extends javax.swing.JFrame {
                         xmlReader.setContentHandler(new CopyHandler(file));
                         break;
                     case "Reservations":
-                        logger.log(Level.INFO, "Loading Copies handler");
-                        xmlReader.setContentHandler(new CopyHandler(file));
+                        logger.log(Level.INFO, "Loading Reservations handler");
+                        xmlReader.setContentHandler(new ReservationHandler(file));
                         break;
                     case "DeletedCopies":
                         logger.log(Level.INFO, "Loading Copies handler");
                         xmlReader.setContentHandler(new DeletedCopyHandler(file));
                         break;
+                    
                 }
                 xmlReader.parse(ofilename);
             } catch (IOException ex) {
